@@ -1,0 +1,52 @@
+#include <stdio.h>
+
+void main() {
+    int fragment[20], b[20], p[20]; // Fragment sizes, block sizes, process sizes
+    int i, j, nb, np, temp, lowest = 9999;
+    static int barray[20], parray[20]; // Block allocation and process allocation arrays
+
+    // Input number of blocks and processes
+    printf("\n\t\t\tMemory Management Scheme - Best Fit");
+    printf("\nEnter the number of blocks: ");
+    scanf("%d", &nb);
+    printf("Enter the number of processes: ");
+    scanf("%d", &np);
+
+    // Input block sizes
+    printf("\nEnter the size of the blocks:\n");
+    for (i = 1; i <= nb; i++) {
+        printf("Block no.%d: ", i);
+        scanf("%d", &b[i]);
+    }
+
+    // Input process sizes
+    printf("\nEnter the size of the processes:\n");
+    for (i = 1; i <= np; i++) {
+        printf("Process no.%d: ", i);
+        scanf("%d", &p[i]);
+    }
+
+    // Best Fit Algorithm
+    for (i = 1; i <= np; i++) { // Iterate over each process
+        for (j = 1; j <= nb; j++) { // Iterate over each block
+            if (barray[j] != 1) { // If block is not already allocated
+                temp = b[j] - p[i]; // Calculate remaining space in the block
+                if (temp >= 0 && lowest > temp) { // Check if it fits and is the best fit so far
+                    parray[i] = j; // Assign block to process
+                    lowest = temp; // Update lowest difference
+                }
+            }
+        }
+
+        // Store fragmentation and mark block as allocated
+        fragment[i] = lowest;
+        barray[parray[i]] = 1; // Mark block as allocated
+        lowest = 10000; // Reset lowest for next process
+    }
+
+    // Display allocation results
+    printf("\nProcess_no\tProcess_size\tBlock_no\tBlock_size\tFragment");
+    for (i = 1; i <= np && parray[i] != 0; i++) {
+        printf("\n%d\t\t%d\t\t%d\t\t%d\t\t%d", i, p[i], parray[i], b[parray[i]], fragment[i]);
+    }
+}
