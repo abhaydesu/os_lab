@@ -1,0 +1,71 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include <unistd.h>
+
+// Semaphores to manage room and chopsticks
+sem_t room;                 // Semaphore for room limit
+sem_t chopstick[5];         // Array of semaphores for chopsticks
+
+// Function declarations
+void* philosopher(void* num);
+void eat(int phil);
+
+int main() {
+    int i, philosopher_ids[5];
+    pthread_t tid[5];       // Array of thread identifiers
+
+    // Initialize the room semaphore (max 4 philosophers can enter at a time)
+    sem_init(&room, 0, 4);
+
+    // Initialize semaphores for chopsticks (each initially available)
+    for (i = 0; i < 5; i++) {
+        sem_init(&chopstick[i], 0, 1);
+    }
+
+    // Create philosopher threads
+    for (i = 0; i < 5; i++) {
+        philosopher_ids[i] = i; // Assign philosopher ID
+        pthread_create(&tid[i], NULL, philosopher, (void*)&philosopher_ids[i]);
+    }
+
+    // Wait for all philosopher threads to finish
+    for (i = 0; i < 5; i++) {
+        pthread_join(tid[i], NULL);
+    }
+
+    return 0;
+}
+
+// Philosopher thread function
+void* philosopher(void* num) {
+    int phil = *(int*)num; // Get philosopher ID
+
+    // Try to enter the room
+    sem_wait(&room);
+    printf("\nPhilosopher %d has entered the room", phil);
+
+    // Pick up chopsticks (left and right)
+    sem_wait(&chopstick[phil]);                // Left chopstick
+    sem_wait(&chopstick[(phil + 1) % 5]);      // Right chopstick
+
+    // Eat
+    eat(phil);
+    sleep(2); // Simulate eating time
+
+    // Finished eating
+    printf("\nPhilosopher %d has finished eating", phil);
+
+    // Put down chopsticks (left and right)
+    sem_post(&chopstick[(phil + 1) % 5]);      // Right chopstick
+    sem_post(&chopstick[phil]);                // Left chopstick
+
+    // Leave the room
+    sem_post(&room);
+}
+
+// Function to simulate eating
+void eat(int phil) {
+    printf("\nPhilosopher %d is eating", phil);
+}
