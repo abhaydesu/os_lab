@@ -1,0 +1,59 @@
+#include <stdio.h>
+#include <stdlib.h> // For exit()
+
+// Function to allocate files using the given method
+void recurse(int files[]) {
+    int flag = 0, startBlock, len, j, k, ch;
+
+    // Input starting block and length of the file
+    printf("Enter the starting block and the length of the file: ");
+    scanf("%d%d", &startBlock, &len);
+
+    // Check if all blocks required for the file are free
+    for (j = startBlock; j < (startBlock + len); j++) {
+        if (files[j] == 0)
+            flag++; // Count free blocks
+    }
+
+    // If sufficient free blocks are available
+    if (len == flag) {
+        printf("Allocating file...\n");
+        for (k = startBlock; k < (startBlock + len); k++) {
+            if (files[k] == 0) {
+                files[k] = 1; // Mark block as allocated
+                printf("Block %d -> Allocated\n", k);
+            }
+        }
+        printf("The file is successfully allocated to the disk.\n");
+    } else {
+        // If sufficient free blocks are not available
+        printf("The file cannot be allocated to the disk. Not enough free space.\n");
+    }
+
+    // Ask user if they want to allocate more files
+    printf("Do you want to allocate more files?\n");
+    printf("Press 1 for YES, 0 for NO: ");
+    scanf("%d", &ch);
+
+    if (ch == 1)
+        recurse(files); // Recursively allocate files
+    else
+        exit(0); // Exit the program
+
+    return;
+}
+
+int main() {
+    int files[50];
+
+    // Initialize all blocks as free (0 indicates free, 1 indicates allocated)
+    for (int i = 0; i < 50; i++)
+        files[i] = 0;
+
+    printf("Initial Disk Blocks Status: All blocks are free.\n");
+
+    // Call the function to start file allocation
+    recurse(files);
+
+    return 0;
+}
