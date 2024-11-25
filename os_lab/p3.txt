@@ -1,39 +1,56 @@
 #include <stdio.h>
-int main() 
-{
- int a[10],b[10],x[10],i,j,smallest,count=0,time,n;
- double avg=0,tt=0,end;
-  printf("enter the number of Processes:\n");
-  scanf("%d",&n); 
- printf("enter arrival time\n");
- for(i=0;i<n;i++)
- scanf("%d",&a[i]);
- printf("enter burst time\n");
- for(i=0;i<n;i++)
- scanf("%d",&b[i]); 
- for(i=0;i<n;i++)
- x[i]=b[i];
 
-  b[9]=9999;
-  
- for(time=0;count!=n;time++)
- {
-   smallest=9;
-  for(i=0;i<n;i++)
-  {
-   if(a[i]<=time && b[i]<b[smallest] && b[i]>0 )
-   smallest=i;
-  }
-  b[smallest]--;
-  if(b[smallest]==0)
-  {
-   count++;
-   end=time+1;
-   avg=avg+end-a[smallest]-x[smallest];
-   tt= tt+end-a[smallest];
-  }
- }
- printf("\n\nAverage waiting time = %lf\n",avg/n);
-    printf("Average Turnaround time = %lf",tt/n);
+int main() {
+    int a[10], b[10], x[10]; // Arrays for arrival time, burst time, and a copy of burst time
+    int i, j, smallest, count = 0, time, n;
+    double avg_wait_time = 0, avg_turnaround_time = 0, end;
+
+    // Step 1: Input the number of processes
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+
+    // Step 2: Input the arrival times of all processes
+    printf("Enter arrival times of processes: ");
+    for (i = 0; i < n; i++) {
+        scanf("%d", &a[i]);
+    }
+
+    // Step 3: Input the burst times of all processes
+    printf("Enter burst times of processes: ");
+    for (i = 0; i < n; i++) {
+        scanf("%d", &b[i]);
+        x[i] = b[i]; // Copy burst time into a separate array to preserve original values
+    }
+
+    // Step 4: Set a high value to serve as a placeholder for "no process"
+    b[9] = 9999;
+
+    // Step 5: Start processing using Shortest Remaining Time First (SRTF) scheduling
+    for (time = 0; count != n; time++) {
+        smallest = 9; // Assume no valid process is available initially
+
+        // Step 6: Find the process with the smallest remaining burst time
+        for (i = 0; i < n; i++) {
+            if (a[i] <= time && b[i] < b[smallest] && b[i] > 0) {
+                smallest = i; // Update the index of the smallest remaining burst time
+            }
+        }
+
+        // Step 7: Reduce the burst time of the selected process
+        b[smallest]--;
+
+        // Step 8: If the process completes (burst time becomes 0)
+        if (b[smallest] == 0) {
+            count++;             // Increment the count of completed processes
+            end = time + 1;      // Record the time when the process ends
+            avg_wait_time += end - a[smallest] - x[smallest]; // Calculate waiting time
+            avg_turnaround_time += end - a[smallest];         // Calculate turnaround time
+        }
+    }
+
+    // Step 9: Print the average waiting time and turnaround time
+    printf("\n\nAverage Waiting Time = %.2lf\n", avg_wait_time / n);
+    printf("Average Turnaround Time = %.2lf\n", avg_turnaround_time / n);
+
     return 0;
 }
