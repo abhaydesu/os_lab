@@ -1,0 +1,143 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+// Global variables
+int totalTracks, numRequests, currentHead, distance;
+int diskRequests[100];
+
+// Function to display the menu
+void displayMenu() {
+    printf("\n\n******** MENU ********");
+    printf("\n1. Input Data");
+    printf("\n2. SCAN Disk Scheduling");
+    printf("\n3. Exit");
+    printf("\n\nEnter your choice: ");
+}
+
+// Function to input the data
+void inputData() {
+    printf("Enter total number of tracks: ");
+    scanf("%d", &totalTracks);
+
+    printf("Enter total number of disk requests: ");
+    scanf("%d", &numRequests);
+
+    printf("Enter the disk requests in FCFS order:\n");
+    for (int i = 0; i < numRequests; i++) {
+        scanf("%d", &diskRequests[i]);
+    }
+
+    printf("Enter the current head position: ");
+    scanf("%d", &currentHead);
+}
+
+// Function to sort disk requests in ascending order
+void sortRequests() {
+    for (int i = 0; i < numRequests - 1; i++) {
+        for (int j = 0; j < numRequests - i - 1; j++) {
+            if (diskRequests[j] > diskRequests[j + 1]) {
+                int temp = diskRequests[j];
+                diskRequests[j] = diskRequests[j + 1];
+                diskRequests[j + 1] = temp;
+            }
+        }
+    }
+}
+
+// Function to perform SCAN Disk Scheduling
+void scanDiskScheduling() {
+    int direction, index = -1;
+    distance = 0;
+
+    printf("Enter the direction of head movement:\n");
+    printf("1 - Towards higher tracks (Right)\n");
+    printf("0 - Towards lower tracks (Left)\n");
+    scanf("%d", &direction);
+
+    // Sort the disk requests
+    sortRequests();
+
+    // Find the position of the current head in the sorted array
+    for (int i = 0; i < numRequests; i++) {
+        if (diskRequests[i] >= currentHead) {
+            index = i;
+            break;
+        }
+    }
+
+    printf("\nProcessing order: ");
+    printf("%d => ", currentHead);
+
+    if (direction == 1) {
+        // Move towards higher tracks (Right)
+        for (int i = index; i < numRequests; i++) {
+            printf("%d => ", diskRequests[i]);
+            distance += abs(currentHead - diskRequests[i]);
+            currentHead = diskRequests[i];
+        }
+
+        // Go to the end of the disk
+        if (currentHead != totalTracks - 1) {
+            printf("%d => ", totalTracks - 1);
+            distance += abs(currentHead - (totalTracks - 1));
+            currentHead = totalTracks - 1;
+        }
+
+        // Move back to lower tracks
+        for (int i = index - 1; i >= 0; i--) {
+            printf("%d => ", diskRequests[i]);
+            distance += abs(currentHead - diskRequests[i]);
+            currentHead = diskRequests[i];
+        }
+    } else {
+        // Move towards lower tracks (Left)
+        for (int i = index - 1; i >= 0; i--) {
+            printf("%d => ", diskRequests[i]);
+            distance += abs(currentHead - diskRequests[i]);
+            currentHead = diskRequests[i];
+        }
+
+        // Go to the start of the disk
+        if (currentHead != 0) {
+            printf("0 => ");
+            distance += abs(currentHead - 0);
+            currentHead = 0;
+        }
+
+        // Move back to higher tracks
+        for (int i = index; i < numRequests; i++) {
+            printf("%d => ", diskRequests[i]);
+            distance += abs(currentHead - diskRequests[i]);
+            currentHead = diskRequests[i];
+        }
+    }
+
+    printf("End\n");
+    printf("Total Distance Traversed: %d\n", distance);
+}
+
+// Main function
+int main() {
+    int choice;
+
+    while (1) {
+        displayMenu();
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                inputData();
+                break;
+            case 2:
+                scanDiskScheduling();
+                break;
+            case 3:
+                exit(0);
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+    }
+
+    return 0;
+}
