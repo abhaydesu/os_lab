@@ -1,0 +1,106 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Initialize semaphores and buffer count variables
+int mutex = 1;  // Mutual exclusion semaphore
+int empty = 3;  // Semaphore for empty slots (initial buffer size = 3)
+int full = 0;   // Semaphore for full slots
+int x = 0;      // Counter to track produced items
+
+// Function declarations
+void producer();
+void consumer();
+int wait(int s);
+int signal(int s);
+
+int main() 
+{
+    int choice;
+
+    printf("1. Producer\n");
+    printf("2. Consumer\n");
+    printf("3. Exit\n");
+
+    // Menu-driven program
+    while (1) {
+        printf("\nEnter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1: // Producer operation
+                if (mutex == 1 && empty != 0) {
+                    producer();
+                } else {
+                    printf("Buffer is full.\n");
+                }
+                break;
+
+            case 2: // Consumer operation
+                if (mutex == 1 && full != 0) {
+                    consumer();
+                } else {
+                    printf("Buffer is empty.\n");
+                }
+                break;
+
+            case 3: // Exit
+                exit(0);
+                break;
+
+            default:
+                printf("Invalid choice. Please enter 1, 2, or 3.\n");
+        }
+    }
+
+    return 0;
+}
+
+// Semaphore `wait` operation (decrements the semaphore value)
+int wait(int s) {
+    return (--s);
+}
+
+// Semaphore `signal` operation (increments the semaphore value)
+int signal(int s) {
+    return (++s);
+}
+
+// Producer function
+void producer() {
+    mutex = wait(mutex);   // Lock the critical section
+    full = signal(full);   // Increase the count of full slots
+    empty = wait(empty);   // Decrease the count of empty slots
+    x++;                   // Increment the produced item count
+    printf("Producer produces item %d\n", x);
+
+    // Optional: Display items in the buffer
+    if (x <= 3) {
+        printf("Items in buffer: ");
+        for (int i = 1; i <= x; i++) {
+            printf("%d ", i);
+        }
+        printf("\n");
+    }
+
+    mutex = signal(mutex); // Unlock the critical section
+}
+
+// Consumer function
+void consumer() {
+    mutex = wait(mutex);   // Lock the critical section
+    full = wait(full);     // Decrease the count of full slots
+    empty = signal(empty); // Increase the count of empty slots
+    printf("Consumer consumes item %d\n", x);
+    x--;                   // Decrement the produced item count
+
+    // Optional: Display remaining items in the buffer
+    if (x >= 0) {
+        printf("Remaining items in buffer: ");
+        for (int i = 1; i <= x; i++) {
+            printf("%d ", i);
+        }
+        printf("\n");
+    }
+
+    mutex = signal(mutex); // Unlock the critical section
+}
